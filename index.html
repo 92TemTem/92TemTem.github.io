@@ -2,14 +2,15 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>KPT 총기 밴 및 제한 부착물 여부 확인</title>
+    <title>KPT 통합 도구</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
         }
@@ -19,7 +20,8 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 500px;
+            max-width: 600px;
+            width: 100%;
         }
         h1 {
             color: #333;
@@ -48,7 +50,7 @@
         button:hover {
             background-color: #0056b3;
         }
-        #result {
+        #result, #map-mode-result {
             margin-top: 20px;
             font-size: 16px;
             font-weight: bold;
@@ -59,20 +61,42 @@
             color: #555;
             text-align: left;
         }
+        .tab-buttons {
+            margin-bottom: 20px;
+        }
+        .tab-buttons button {
+            margin: 0 10px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>KPT 총기 제한여부 확인</h1>
-        <label for="gun">총기의 이름을 '정확히' 입력하세요: </label>
-        <input type="text" id="gun" name="gun">
-        <button onclick="checkGun()">확인</button>
-        <p id="result"></p>
-        <div class="note">
-            <p>관통력이 1.0인 총기엔 AP와 Squad Barrel이 전부 허용됩니다.</p>
-            <p>관통력이 1.1인 총기엔 AP와 Squad Barrel 둘중 하나만 사용하실 수 있습니다.</p>
-            <p>관통력이 1.2 이상일경우 Squad Barrel 만 사용하실 수 있습니다.</p>
-            <p>위의 예외사항을 제외한 모든 Ammo 부착물은 일괄적으로 사용하실 수 없습니다. (확장탄창 부착물 포함)</p>
+        <h1>KPT 도구</h1>
+        <div class="tab-buttons">
+            <button onclick="showTab('gun-check')">총기 제한여부 확인</button>
+            <button onclick="showTab('map-mode')">맵, 모드 뽑기</button>
+        </div>
+        <div id="gun-check" class="tab-content">
+            <label for="gun">총기의 이름을 '정확히' 입력하세요: </label>
+            <input type="text" id="gun" name="gun">
+            <button onclick="checkGun()">확인</button>
+            <p id="result"></p>
+            <div class="note">
+                <p>관통력이 1.0인 총기엔 AP와 Squad Barrel이 전부 허용됩니다.</p>
+                <p>관통력이 1.1인 총기엔 AP와 Squad Barrel 둘중 하나만 사용하실 수 있습니다.</p>
+                <p>관통력이 1.2 이상일경우 Squad Barrel 만 사용하실 수 있습니다.</p>
+                <p>위의 예외사항을 제외한 모든 Ammo 부착물은 일괄적으로 사용하실 수 없습니다. (확장탄창 부착물 포함)</p>
+            </div>
+        </div>
+        <div id="map-mode" class="tab-content">
+            <button onclick="selectRandomMapAndMode()">뽑기</button>
+            <div class="result" id="map-mode-result"></div>
         </div>
     </div>
 
@@ -136,6 +160,35 @@
 
             document.getElementById("result").innerText = result;
         }
+
+        function getRandomElement(arr) {
+            const randomIndex = Math.floor(Math.random() * arr.length);
+            return arr[randomIndex];
+        }
+
+        function selectRandomMapAndMode() {
+            const maps = ["elevation", "metro", "warehouse", "desert storm", "suburbia"];
+            const modes = ["Team Deathmatch", "King of the hill", "flare domination", "hard point", "kill confirmed"];
+
+            const selectedMap = getRandomElement(maps);
+            const selectedMode = getRandomElement(modes);
+
+            const resultDiv = document.getElementById("map-mode-result");
+            resultDiv.innerHTML = `<p>선택된 맵: <strong>${selectedMap}</strong></p>
+                                   <p>선택된 모드: <strong>${selectedMode}</strong></p>`;
+        }
+
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            showTab('gun-check'); // 기본적으로 첫 번째 탭을 활성화
+        });
     </script>
 </body>
 </html>
