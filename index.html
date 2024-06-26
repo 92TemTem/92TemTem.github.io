@@ -5,8 +5,8 @@
     <title>KPT 통합 도구</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -15,57 +15,130 @@
             margin: 0;
         }
         .container {
-            background-color: #fff;
-            padding: 20px 40px;
+            background-color: #f0f0f0;
+            width: 60%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
         }
-        h1 {
-            color: #333;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
+        .title {
+            font-size: 40px;
             font-weight: bold;
+            color: #34495e;
+            margin-bottom: 50px;
+            margin-top: 20px;
+            text-align: center;
         }
-        input[type="text"] {
+        .section {
             width: 100%;
-            padding: 10px;
             margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        button {
+        .section-title {
+            font-size: 30px;
+            font-weight: bold;
+            color: #34495e;
+            margin-right: 20px;
+            white-space: nowrap;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            flex-grow: 1;
+        }
+        .button, .map-mode-button {
+            margin: 10px;
             padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
+            background-color: #007BFF;
+            color: white;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
         }
-        button:hover {
+        .button:hover, .map-mode-button:hover {
             background-color: #0056b3;
+            transform: scale(1.1);
         }
-        #result, #map-mode-result {
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 10px;
+            overflow-y: auto;
+            max-height: 200px;
+            width: 200px;
+        }
+        .dropdown-content button {
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .dropdown-content button:hover {
+            background-color: #ddd;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .weapon-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #34495e;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .message {
             margin-top: 20px;
             font-size: 16px;
             font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
         }
-        .note {
-            margin-top: 20px;
+        .message .highlight-blue {
+            color: #3498db;
+        }
+        .message .highlight-red {
+            color: #e74c3c;
+        }
+        #additionalInfo {
+            margin-top: 30px;
             font-size: 14px;
-            color: #555;
-            text-align: left;
+            color: #666;
+            text-align: center;
         }
         .tab-buttons {
             margin-bottom: 20px;
         }
         .tab-buttons button {
             margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .tab-buttons button:hover {
+            background-color: #0056b3;
         }
         .tab-content {
             display: none;
@@ -73,93 +146,302 @@
         .tab-content.active {
             display: block;
         }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .map-mode-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>KPT 도구</h1>
+        <h1 class="title">KPT 통합 도구</h1>
         <div class="tab-buttons">
             <button onclick="showTab('gun-check')">총기 제한여부 확인</button>
             <button onclick="showTab('map-mode')">맵, 모드 뽑기</button>
         </div>
-        <div id="gun-check" class="tab-content">
-            <label for="gun">총기의 이름을 '정확히' 입력하세요: </label>
-            <input type="text" id="gun" name="gun">
-            <button onclick="checkGun()">확인</button>
-            <p id="result"></p>
-            <div class="note">
-                <p>관통력이 1.0인 총기엔 AP와 Squad Barrel이 전부 허용됩니다.</p>
-                <p>관통력이 1.1인 총기엔 AP와 Squad Barrel 둘중 하나만 사용하실 수 있습니다.</p>
-                <p>관통력이 1.2 이상일경우 Squad Barrel 만 사용하실 수 있습니다.</p>
-                <p>위의 예외사항을 제외한 모든 Ammo 부착물은 일괄적으로 사용하실 수 없습니다. (확장탄창 부착물 포함)</p>
-                <p>해당 규칙은 "Assult Rifle", "Carbine"에만 적용되며, 이외의 무기군에선 기존과 같은 Ammo 올밴을 유지합니다.</p>
+        <div id="gun-check" class="tab-content active">
+            <div class="section">
+                <div class="section-title">병과 주무기</div>
+                <div class="button-container" id="primaryWeapons"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">공용 주무기</div>
+                <div class="button-container" id="commonWeapons"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">보조무기</div>
+                <div class="button-container" id="secondaryWeapons"></div>
+            </div>
+            <div class="section">
+                <div class="section-title">수류탄</div>
+                <div class="button-container" id="grenades"></div>
+            </div>
+            <div id="selectedWeapon" class="weapon-name"></div>
+            <div id="message1" class="message"></div>
+            <div id="message2" class="message"></div>
+            <div id="additionalInfo">
+                돌격소총과 카빈을 제외한 모든 총기의 AMMO 부착물은 금지됩니다.<br><br>모든 전용 부착물은 금지됩니다.
             </div>
         </div>
         <div id="map-mode" class="tab-content">
-            <button onclick="selectRandomMapAndMode()">뽑기</button>
-            <div class="result" id="map-mode-result"></div>
+            <div class="map-mode-container">
+                <h1>맵, 모드 뽑기</h1>
+                <button class="map-mode-button" onclick="selectRandomMapAndMode()">뽑기</button>
+                <div class="result" id="result"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        const gunData = {
-            // 빨간색 (사용 불가)
-            banned: ["COLT LMG", "M60", "AUG HBAR", "MG36", "RPK12", "L86 LSW", "RPK", "HK21E", "HAMR IAR", "RPK74", "MG3KWS", "M1918A2", "MGV-176", "STONER 96", "CHAINSAW", "MG42", "INTERVENTION", "MODEL 700", "AWS", "BFG 50", "AWM", "TRG-42", "MOSIN NAGANT", "DRAGUNOV", "SVDS", "M1903", "K14", "HECATE II", "FT300", "M107", "STEYR SCOUT", "WA2000", "NTW-20", "KSG 12", "MODEL 870", "DBV12", "KS-23M", "SAIGA-12", "STEVEN DB", "E-GUN", "AA-12", "SPAS-12", "DT11", "USAS-12", "M16A4", "M16A1", "M231", "STG-44", "G11K2", "BEOWULF ECR", "AK12BR", "AG-3", "HENRY 45-70", "FAL 50.00", "HCAR", "M4", "MC51", "FAL 50.63 PARA", "1858 CARBINE", "JURY", "CYROJET CARBINE", "X95R", "HK51B", "CAN CANNON", "UMP45", "MP7", "MAC10", "P90", "COLT SMG 633", "M3A1", "K7", "PPSH-41", "KRISS VECTOR", "RAMA 1130", "FIVE-0", "VSS VINTOREZ"],
-            // 노란색 (부착물 제한)
-            restricted: {
-                "AK12, AK103": ["BARS BARREL"],
-                "AS VAL": ["SUPPRESSOR..?"],
-                "AUG A1": ["FOLDED GRIP"],
-                "M16A3, MP5, MP5SD, MP5/10": ["BURST GROUPING"],
-                "TYPE 20": ["INTEGRAL SUPPRESSOR"],
-                "FAMAS F1": ["FAMAS G2"],
-                "TAR-21": ["CTAR BARREL"],
-                "C7A2": ["LSW BARREL"],
-                "G3A3": ["WOOD FURNITURE"],
-                "OTS-126": ["MAGAZINE STOCK"],
-                "HONEY BADGER": ["REMOVE SUPPRESSOR"],
-                "SR-3M": ["VIKUR SUPPRESSOR", "FOLDED GRIP"],
-                "KAC SRR": ["SPEED LOADER"],
-                "MP5K": ["MP5K STOCK", "BURST GROUPING"],
-                "MP10": ["FLASHLIGHT OFF"],
-                "TOMMY GUN": ["BOX GRIP", "30RD MAG", "50RD DRUM", "M1919 CONV."],
-                "BWC9 A": ["BURST CONV.", "SEMI-AUTO CONV."],
-                "MK11, SKS": ["ASSAULT BARREL"],
-                "SL-8": ["MARKSMAN BARREL", "BIANRY TRIGGER"],
-                "DRAGUNOV SVU": ["SVU-A CONV."],
-                "BEOWULF TCR": ["BINARY TRIGGER"]
-            },
-            // 초록색 (제한 없음)
-            unrestricted: ["AN-94", "SCAR-L", "G36", "AUG A2", "K2", "AK47", "AUG A3", "L85A2", "HK416", "AK74", "AKM", "TYPE-88", "M14", "SCAR-H", "HK417", "M4A1", "G36K", "L22", "SCAR PDW", "AKU12", "GROZA-1", "AK12C", "K1A", "GROZA-4", "C8A2", "G36C", "COLT MARS", "L2A3", "UZI", "AUG A3 PARA XS", "AKS74U", "FAL PARA SHORTY", "PP-19 BIZON", "MP40", "X95 SMG", "MSG90", "M21", "SA58 SPR", "SCAR SSR"]
+        const data = [
+            { type: '돌격소총', name: 'AK12', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'AN-94', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'AUG A2', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'K2', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'AK47', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'AUG A3', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'L85A2', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'HK416', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'AK74', ban: '-', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'SCAR-L', ban: '-', ap: 'O', lb: 'O' },
+            { type: '돌격소총', name: 'TYPE 88', ban: '-', ap: 'O', lb: 'O' },
+            { type: '돌격소총', name: 'M16A4', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '돌격소총', name: 'M16A1', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '돌격소총', name: 'M231', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '돌격소총', name: 'STG-44', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '돌격소총', name: 'G11K2', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '돌격소총', name: 'G36', ban: '-', ap: 'X', lb: '-' },
+            { type: '돌격소총', name: 'M16A3', ban: 'BURST GROUPING', ap: 'X', lb: '-' },
+            { type: '돌격소총', name: 'AK103', ban: 'BARS BARREL', ap: 'X', lb: '-' },
+            { type: '돌격소총', name: 'TAR-21', ban: 'CAR BARREL', ap: 'O', lb: '-' },
+            { type: '돌격소총', name: 'C7A2', ban: 'LSW BARREL', ap: 'O', lb: 'X' },
+            { type: '개인방어화기', name: 'UMP45', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'MP7', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'MAC10', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'P90', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'COLT SMG 633', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'M3A1', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'K7', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'PPSH-41', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'KRISS VECTOR', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'RAMA 1130', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'FIVE-0', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '개인방어화기', name: 'MP5', ban: 'BURST GROUPING', ap: 'X', lb: 'O' },
+            { type: '개인방어화기', name: 'MP5SD', ban: 'BURST GROUPING', ap: 'X', lb: 'O' },
+            { type: '개인방어화기', name: 'MP5/10', ban: 'BURST GROUPING', ap: 'X', lb: 'O' },
+            { type: '개인방어화기', name: 'MP5K', ban: 'MP5K STOCK, BURST GROUPING', ap: 'X', lb: 'O' },
+            { type: '개인방어화기', name: 'G36C', ban: '-', ap: 'X', lb: 'O' },
+            { type: '개인방어화기', name: 'MP10', ban: 'FLASHLIGHT OFF', ap: 'X', lb: 'O' },
+            { type: '개인방어화기', name: 'TOMMY GUN', ban: 'BOX GRIP, 30RD MAG, 50RD DRUM, M1919 CONV', ap: 'X', lb: 'O' },
+            { type: '개인방어화기', name: 'BWC9 A', ban: '-', ap: 'X', lb: '-' },
+            { type: '경기관총', name: '경기관총', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '저격소총', name: '저격소총', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '산탄총', name: '산탄총', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '전투소총', name: 'M14', ban: '-', ap: 'X', lb: '-' },
+            { type: '전투소총', name: 'SCAR-H', ban: '-', ap: 'X', lb: '-' },
+            { type: '전투소총', name: 'HK417', ban: '-', ap: 'X', lb: 'O' },
+            { type: '전투소총', name: 'G3A3', ban: 'WOOD FURNITURE', ap: 'X', lb: '-' },
+            { type: '전투소총', name: 'BEOWULF ECR', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '전투소총', name: 'AK12BR', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '전투소총', name: 'AG-3', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '전투소총', name: 'HENRY 45-70', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '전투소총', name: 'FAL 50.00', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '전투소총', name: 'HCAR', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'M4A1', ban: '-', ap: 'O', lb: 'O' },
+            { type: '카빈', name: 'G36K', ban: '-', ap: 'X', lb: 'O' },
+            { type: '카빈', name: 'M4', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'MC51', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'FAL 50.63', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: '1858 CARBINE', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'JURY', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'GYROJET CARBINE', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'X95R', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'HK51B', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'CAN CANNON', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '카빈', name: 'L22', ban: '-', ap: 'O', lb: 'O' },
+            { type: '카빈', name: 'SCAR PDW', ban: '-', ap: 'O', lb: 'O' },
+            { type: '카빈', name: 'AKU12', ban: '-', ap: 'O', lb: 'O' },
+            { type: '카빈', name: 'AK12C', ban: '-', ap: 'O', lb: 'O' },
+            { type: '카빈', name: 'C8A2', ban: '-', ap: 'O', lb: 'O' },
+            { type: '카빈', name: 'GROZA-1', ban: '-', ap: 'X', lb: '-' },
+            { type: '카빈', name: 'OTS-126', ban: 'MAGAZINE STOCK', ap: 'O', lb: '-' },
+            { type: '카빈', name: 'HONEY BADGER', ban: 'REMOVE SUPPRESSOR', ap: 'X', lb: 'O' },
+            { type: '지정사수소총', name: 'MK11', ban: 'ASSAULT BARREL', ap: 'X', lb: '-' },
+            { type: '지정사수소총', name: 'SKS', ban: 'ASSAULT BARREL', ap: 'X', lb: '-' },
+            { type: '지정사수소총', name: 'SL-8', ban: 'MARKSMAN BARREL, BINARY TRIGGER', ap: 'X', lb: '-' },
+            { type: '지정사수소총', name: 'DRAGUNOV SVU', ban: '-', ap: 'X', lb: 'X' },
+            { type: '지정사수소총', name: 'VSS VINTOREZ', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '지정사수소총', name: 'MSG90', ban: '-', ap: 'X', lb: '-' },
+            { type: '지정사수소총', name: 'M21', ban: '-', ap: 'X', lb: '-' },
+            { type: '지정사수소총', name: 'SA58 SPR', ban: '-', ap: 'X', lb: '-' },
+            { type: '지정사수소총', name: 'SCAR SSR', ban: '-', ap: 'X', lb: '-' },
+            { type: '자동권총', name: 'M9', ban: '모든 부착물', ap: 'X', lb: '-' },
+            { type: '자동권총', name: 'G17', ban: '모든 부착물', ap: 'X', lb: '-' },
+            { type: '자동권총', name: 'M17', ban: '모든 부착물', ap: 'X', lb: '-' },
+            { type: '자동권총', name: 'M1911A1', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'DESERT EAGLE L5', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'G21', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'G23', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'M45A1', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'G40', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'KG-99', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'G50', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'FIVE SEVEN', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'ZIP 22', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'GI M1', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'HARD BALLER', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'IZHEVSK PB', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'MAKAROV PM', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'GB-22', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'DESERT EAGLE XIX', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'AUTOMAG III', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'GYROJET MARK I', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'GSP', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'GRIZZLY', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'M2011', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'ALIEN', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '자동권총', name: 'AF2011-A1', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: 'G18C', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: '93R', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: 'PP-2000', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: 'TEC-9', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: 'MICRO UZI', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: 'ŠKORPION VZ.61', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: 'ASMI', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기관권총', name: 'MP1911', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '리볼버', name: '리볼버', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '기타', name: '기타', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '파편수류탄', name: 'MK 2 FRAG', ban: '-', ap: '/', lb: '/' },
+			{ type: '파편수류탄', name: 'M24 STICK', ban: '금지됨', ap: '/', lb: '/' },
+			{ type: '파편수류탄', name: 'M26 FRAG', ban: '금지됨', ap: '/', lb: '/' },
+			{ type: '파편수류탄', name: 'M560 MINI', ban: '금지됨', ap: '/', lb: '/' },
+			{ type: '파편수류탄', name: 'V40 MINI', ban: '금지됨', ap: '/', lb: '/' },
+			{ type: '파편수류탄', name: 'ROLY HG', ban: '금지됨', ap: '/', lb: '/' },
+			{ type: '고폭수류탄', name: '고폭수류탄', ban: '금지됨', ap: '/', lb: '/' },
+            { type: '충격수류탄', name: '충격수류탄', ban: '금지됨', ap: '/', lb: '/' },
+        ];
+
+        const sections = {
+            '병과 주무기': ['돌격소총', '개인방어화기', '경기관총', '저격소총'],
+            '공용 주무기': ['전투소총', '카빈', '산탄총', '지정사수소총'],
+            '보조무기': ['자동권총', '기관권총', '리볼버', '기타'],
+            '수류탄': ['파편수류탄', '고폭수류탄', '충격수류탄']
         };
 
-        function checkGun() {
-            const gun = document.getElementById("gun").value.toUpperCase();
-            let result = "";
+        const selectedWeapon = document.getElementById('selectedWeapon');
+        const message1 = document.getElementById('message1');
+        const message2 = document.getElementById('message2');
 
-            if (gunData.banned.includes(gun)) {
-                result = "총기가 완전히 사용 금지되었습니다.";
-            } else {
-                let found = false;
-                for (const [guns, restrictions] of Object.entries(gunData.restricted)) {
-                    const gunList = guns.split(", ");
-                    if (gunList.includes(gun)) {
-                        const restrictionsText = restrictions.join(", ");
-                        result = `총기는 사용할 수 있으나 ${restrictionsText} 부착물은 사용하실 수 없습니다.`;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    if (gunData.unrestricted.includes(gun)) {
-                        result = "해당 총기는 사용하실 수 있습니다.";
-                    } else {
-                        result = "총기가 목록에 없습니다.";
-                    }
-                }
-            }
+        for (const [section, types] of Object.entries(sections)) {
+            const containerId = section === '병과 주무기' ? 'primaryWeapons'
+                : section === '공용 주무기' ? 'commonWeapons'
+                : section === '보조무기' ? 'secondaryWeapons'
+                : 'grenades';
+            const buttonContainer = document.getElementById(containerId);
 
-            document.getElementById("result").innerText = result;
+            types.forEach(type => {
+                const dropdown = document.createElement('div');
+                dropdown.className = 'dropdown';
+                const button = document.createElement('button');
+                button.className = 'button';
+                button.innerText = type;
+                const dropdownContent = document.createElement('div');
+                dropdownContent.className = 'dropdown-content';
+
+                data.filter(item => item.type === type).forEach(item => {
+                    const weaponButton = document.createElement('button');
+                    weaponButton.innerText = item.name.includes("금지") ? item.name : item.name.split(', ')[0];
+                    weaponButton.onclick = () => {
+                        selectedWeapon.innerText = item.name.includes("금지") ? type : item.name.split(', ')[0];
+                        if (item.name.includes("금지")) {
+                            message1.innerText = item.ban;
+                            message2.innerText = '';
+                            return;
+                        }
+
+                        if (item.ban === '금지됨') {
+                            message1.innerHTML = '<span class="highlight-red">금지된 무기입니다.</span>';
+                            message2.innerText = '';
+                            return;
+                        } else if (item.ban === '-' || item.ban.trim() === '') {
+                            message1.innerText = '사용 가능한 무기입니다.';
+                        } else {
+                            message1.innerHTML = `사용 불가 부착물: <span class="highlight-red">${item.ban}</span>`;
+                        }
+
+                        if (item.ban === '모든 부착물') {
+                            message1.innerHTML = '사용 가능한 무기이나, <span class="highlight-red">모든 부착물</span>이 사용 금지입니다.';
+                            message2.innerText = '';
+                            return;
+                        }
+
+                        if (item.ap === '/' && item.lb === '/') {
+                            message2.innerText = '';
+                            return;
+                        }
+                        if (item.ap === 'O' && item.lb === 'O') {
+                            message2.innerHTML = '<span class="highlight-blue">Armor Piercing</span>과 <span class="highlight-blue">연장 총열</span> 부착물 전부 사용 가능합니다.';
+                            return;
+                        }
+                        if (item.ap === '/' && item.lb === '/') {
+                            message2.innerText = 'Armor Piercing과 연장 총열 부착물이 없습니다.';
+                            return;
+                        }
+                        if (item.ap === 'X' && item.lb === 'X') {
+                            message2.innerHTML = '<span class="highlight-red">Armor Piercing</span>과 <span class="highlight-red">연장 총열</span> 부착물 전부 금지입니다.';
+                            return;
+                        }
+
+                        let apMessage = '';
+                        let lbMessage = '';
+                        if (item.ap === 'O') {
+                            apMessage = '<span class="highlight-blue">Armor Piercing</span>은 사용 가능하며,';
+                        } else if (item.ap === 'X') {
+                            apMessage = '<span class="highlight-red">Armor Piercing</span>이 금지돼 있으며,';
+                        } else if (item.ap === '/') {
+                            apMessage = '';
+                        } else if (item.ap === '-') {
+                            apMessage = 'Armor Piercing이 없으며,';
+                        }
+
+                        if (item.lb === 'O') {
+                            lbMessage = ' <span class="highlight-blue">연장 총열</span> 부착물이 사용 가능합니다.';
+                        } else if (item.lb === 'X') {
+                            lbMessage = ' <span class="highlight-red">연장 총열</span> 부착물이 금지입니다.';
+                        } else if (item.lb === '/') {
+                            lbMessage = '';
+                        } else if (item.lb === '-') {
+                            lbMessage = ' 연장 총열 부착물이 없습니다.';
+                        }
+
+                        message2.innerHTML = `${apMessage} ${lbMessage}`;
+                    };
+                    dropdownContent.appendChild(weaponButton);
+                });
+
+                dropdown.appendChild(button);
+                dropdown.appendChild(dropdownContent);
+                buttonContainer.appendChild(dropdown);
+            });
+        }
+
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
         }
 
         function getRandomElement(arr) {
@@ -174,17 +456,9 @@
             const selectedMap = getRandomElement(maps);
             const selectedMode = getRandomElement(modes);
 
-            const resultDiv = document.getElementById("map-mode-result");
+            const resultDiv = document.getElementById("result");
             resultDiv.innerHTML = `<p>선택된 맵: <strong>${selectedMap}</strong></p>
                                    <p>선택된 모드: <strong>${selectedMode}</strong></p>`;
-        }
-
-        function showTab(tabId) {
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.getElementById(tabId).classList.add('active');
         }
 
         document.addEventListener("DOMContentLoaded", function() {
