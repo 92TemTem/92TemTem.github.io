@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>KPT 총기 밴 및 제한 부착물 여부 확인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>KPT 총기 제한여부 확인</h1>
+        <label for="gun">총기의 이름을 '정확히' 입력하세요: </label>
+        <input type="text" id="gun" name="gun">
+        <button onclick="checkGun()">확인</button>
+        <p id="result"></p>
+        <div class="note">
+            <p>관통력이 1.0인 총기엔 AP와 Squad Barrel이 전부 허용됩니다.</p>
+            <p>관통력이 1.1인 총기엔 AP와 Squad Barrel 둘중 하나만 사용하실 수 있습니다.</p>
+            <p>관통력이 1.2 이상일경우 Squad Barrel 만 사용하실 수 있습니다.</p>
+            <p>위의 예외사항을 제외한 모든 Ammo 부착물은 일괄적으로 사용하실 수 없습니다. (확장탄창 부착물 포함)</p>
+        </div>
+    </div>
+
+    <script>
+        const gunData = {
+            // 빨간색 (사용 불가)
+            banned: ["COLT LMG", "M60", "AUG HBAR", "MG36", "RPK12", "L86 LSW", "RPK", "HK21E", "HAMR IAR", "RPK74", "MG3KWS", "M1918A2", "MGV-176", "STONER 96", "CHAINSAW", "MG42", "INTERVENTION", "MODEL 700", "AWS", "BFG 50", "AWM", "TRG-42", "MOSIN NAGANT", "DRAGUNOV", "SVDS", "M1903", "K14", "HECATE II", "FT300", "M107", "STEYR SCOUT", "WA2000", "NTW-20", "KSG 12", "MODEL 870", "DBV12", "KS-23M", "SAIGA-12", "STEVEN DB", "E-GUN", "AA-12", "SPAS-12", "DT11", "USAS-12", "M16A4", "M16A1", "M231", "STG-44", "G11K2", "BEOWULF ECR", "AK12BR", "AG-3", "HENRY 45-70", "FAL 50.00", "HCAR", "M4", "MC51", "FAL 50.63 PARA", "1858 CARBINE", "JURY", "CYROJET CARBINE", "X95R", "HK51B", "CAN CANNON", "UMP45", "MP7", "MAC10", "P90", "COLT SMG 633", "M3A1", "K7", "PPSH-41", "KRISS VECTOR", "RAMA 1130", "FIVE-0", "VSS VINTOREZ"],
+            // 노란색 (부착물 제한)
+            restricted: {
+                "AK12, AK103": ["BARS BARREL"],
+                "AS VAL": ["SUPPRESSOR..?"],
+                "AUG A1": ["FOLDED GRIP"],
+                "M16A3, MP5, MP5SD, MP5/10": ["BURST GROUPING"],
+                "TYPE 20": ["INTEGRAL SUPPRESSOR"],
+                "FAMAS F1": ["FAMAS G2"],
+                "TAR-21": ["CTAR BARREL"],
+                "C7A2": ["LSW BARREL"],
+                "G3A3": ["WOOD FURNITURE"],
+                "OTS-126": ["MAGAZINE STOCK"],
+                "HONEY BADGER": ["REMOVE SUPPRESSOR"],
+                "SR-3M": ["VIKUR SUPPRESSOR", "FOLDED GRIP"],
+                "KAC SRR": ["SPEED LOADER"],
+                "MP5K": ["MP5K STOCK", "BURST GROUPING"],
+                "MP10": ["FLASHLIGHT OFF"],
+                "TOMMY GUN": ["BOX GRIP", "30RD MAG", "50RD DRUM", "M1919 CONV."],
+                "BWC9 A": ["BURST CONV.", "SEMI-AUTO CONV."],
+                "MK11, SKS": ["ASSAULT BARREL"],
+                "SL-8": ["MARKSMAN BARREL", "BIANRY TRIGGER"],
+                "DRAGUNOV SVU": ["SVU-A CONV."],
+                "BEOWULF TCR": ["BINARY TRIGGER"]
+            },
+            // 초록색 (제한 없음)
+            unrestricted: ["AN-94", "SCAR-L", "G36", "AUG A2", "K2", "AK47", "AUG A3", "L85A2", "HK416", "AK74", "AKM", "TYPE-88", "M14", "SCAR-H", "HK417", "M4A1", "G36K", "L22", "SCAR PDW", "AKU12", "GROZA-1", "AK12C", "K1A", "GROZA-4", "C8A2", "G36C", "COLT MARS", "L2A3", "UZI", "AUG A3 PARA XS", "AKS74U", "FAL PARA SHORTY", "PP-19 BIZON", "MP40", "X95 SMG", "MSG90", "M21", "SA58 SPR", "SCAR SSR"]
+        };
+
+        function checkGun() {
+            const gun = document.getElementById("gun").value.toUpperCase();
+            let result = "";
+
+            if (gunData.banned.includes(gun)) {
+                result = "총기가 완전히 사용 금지되었습니다.";
+            } else {
+                let found = false;
+                for (const [guns, restrictions] of Object.entries(gunData.restricted)) {
+                    const gunList = guns.split(", ");
+                    if (gunList.includes(gun)) {
+                        const restrictionsText = restrictions.join(", ");
+                        result = `총기는 사용할 수 있으나 ${restrictionsText} 부착물은 사용하실 수 없습니다.`;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (gunData.unrestricted.includes(gun)) {
+                        result = "해당 총기는 사용하실 수 있습니다.";
+                    } else {
+                        result = "총기가 목록에 없습니다.";
+                    }
+                }
+            }
+
+            document.getElementById("result").innerText = result;
+        }
+    </script>
+</body>
+</html>
